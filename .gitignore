@@ -1,3 +1,8 @@
+*/.DS_STORE
+samples/face/face_data
+
+*/json/*
+*/face_data/*
 # Data files and directories common in repo root
 datasets/
 logs/
