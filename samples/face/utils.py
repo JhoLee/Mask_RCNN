@@ -97,10 +97,31 @@ def extract_coordinates(img_array, classes=[], values=[]):
     
     return data
 
+
+def extract_coordinates_asarray(img_array, classes=[], values=[]):
+
+    height, width = img_array.shape
+
+    array = np.zeros([height, width, 1], dtype=np.uint8)
+
+    for c, v in zip(classes, values):
+
+        for i in range(height):
+            for j in range(width):
+                if img_array[i][j] == v:
+                    array[i][j][0] = 1
+
+    return array
+
 def load_coordiantes_from_mask(img, classes=[], values=[]):
     img_array = open_image_as_nparray(img)
     img_shell = dig_inside(img_array, values=values)
     return extract_coordinates(img_shell, classes=classes, values=values)
+
+def load_coordinates_from_mask_asarray(img, classes=[], values=[]):
+    img_array = open_image_as_nparray(img)
+    img_shell = dig_inside(img_array, values=values)
+    return extract_coordinates_asarray(img_shell, classes=classes, values=values)
 
 def load_info_from_mask(img_dir, img_id, classes=[], values=[]):
     img = os.path.join(img_dir, img_id)
@@ -116,6 +137,7 @@ def load_info_from_mask(img_dir, img_id, classes=[], values=[]):
     data[img_id]['regions']['0']['shape_attributes'] = extract_coordinates(img_shell, classes=classes, values=values)
     data[img_id]['regions']['0']['shape_attributes']['name'] = "polygon"
     data[img_id]['id'] = img_id
+    data[img_id]['filename'] = img_id + '.jpg'
     data[img_id]['size'] = {}
     data[img_id]['size']['height'] = height
     data[img_id]['size']['width'] = width
