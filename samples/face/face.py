@@ -102,8 +102,8 @@ class FaceDataset(utils.Dataset):
             height, width = image.shape[:2]
 
             mask_image_path = os.path.join(mask_dir, im.replace('jpg', 'bmp'))
-            polygons = face_utils.load_coordinates_from_mask_asarray(mask_image_path, ['face'], [128])
-
+            # polygons = face_utils.load_coordinates_from_mask_asarray(mask_image_path, ['face'], [128])
+            polygons = face_utils.load_mask_image_asarray(mask_image_path, ['face'], [128])
             self.add_image(
                 source="face",
                 image_id=im,  # use file name as a unique image id

@@ -17,7 +17,6 @@ import matplotlib.pyplot as plt
 from PIL import Image
 
 
-
 def compare_plots(main_title="", imgs=[], titles=[]):
     fig, axes = plt.subplots(1, 2)
     fig.suptitle(main_title)
@@ -26,7 +25,6 @@ def compare_plots(main_title="", imgs=[], titles=[]):
             axes[i].imshow(imgs[i])
             axes[i].set_title(titles[i])
         plt.show()
-    
 
 
 def open_image_as_nparray(img):
@@ -38,7 +36,6 @@ def open_image_as_nparray(img):
 
 
 def dig_inside(img_array, values=[]):
-
     rows, cols = img_array.shape
 
     array = img_array.copy()
@@ -46,19 +43,19 @@ def dig_inside(img_array, values=[]):
     for v in values:
         for i in range(rows):
             for j in range(cols):
-                if i == 0 or i == rows-1 or \
-                    j == 0 or j == cols-1:
-                        array[i][j] = 0
+                if i == 0 or i == rows - 1 or \
+                        j == 0 or j == cols - 1:
+                    array[i][j] = 0
                 else:
                     if img_array[i][j] == v:
-                        if img_array[i][j] == img_array[i][j-1] and \
-                          img_array[i][j] == img_array[i][j+1] and \
-                          img_array[i][j] == img_array[i+1][j] and \
-                          img_array[i][j] == img_array[i-1][j]:
+                        if img_array[i][j] == img_array[i][j - 1] and \
+                                img_array[i][j] == img_array[i][j + 1] and \
+                                img_array[i][j] == img_array[i + 1][j] and \
+                                img_array[i][j] == img_array[i - 1][j]:
                             array[i][j] = 0
-    
-    
+
     return array
+
 
 def manage_the_values(img_array, values=[], mode='remain'):
     array = img_array.copy()
@@ -75,8 +72,9 @@ def manage_the_values(img_array, values=[], mode='remain'):
             for j in range(cols):
                 if array[i][j] in values:
                     array[i][j] = 0
-    
+
     return array
+
 
 def extract_coordinates(img_array, classes=[], values=[]):
     data = {}
@@ -94,12 +92,11 @@ def extract_coordinates(img_array, classes=[], values=[]):
                     _y.append(j)
         data[c]['x'] = _x
         data[c]['y'] = _y
-    
+
     return data
 
 
 def extract_coordinates_asarray(img_array, classes=[], values=[]):
-
     height, width = img_array.shape
 
     array = np.zeros([height, width, 1], dtype=np.uint8)
@@ -113,19 +110,32 @@ def extract_coordinates_asarray(img_array, classes=[], values=[]):
 
     return array
 
+
 def load_coordiantes_from_mask(img, classes=[], values=[]):
     img_array = open_image_as_nparray(img)
     img_shell = dig_inside(img_array, values=values)
     return extract_coordinates(img_shell, classes=classes, values=values)
+
 
 def load_coordinates_from_mask_asarray(img, classes=[], values=[]):
     img_array = open_image_as_nparray(img)
     img_shell = dig_inside(img_array, values=values)
     return extract_coordinates_asarray(img_shell, classes=classes, values=values)
 
+
+def load_mask_image_asarray(img, classes=[], values=[]):
+    # For one class...
+    img_array = open_image_as_nparray(img)
+
+    array = np.where(img_array == values[0], 1, 0)
+    array = array[:, :, np.newaxis]
+
+    return array
+
+
 def load_info_from_mask(img_dir, img_id, classes=[], values=[]):
     img = os.path.join(img_dir, img_id)
-    
+
     img_id = img_id[:-4]
     img_array = open_image_as_nparray(img)
     img_shell = dig_inside(img_array, values=values)
@@ -144,7 +154,7 @@ def load_info_from_mask(img_dir, img_id, classes=[], values=[]):
     return data
 
 
-def extend_info_into_json( data:dict, json_path:str):
+def extend_info_into_json(data: dict, json_path: str):
     """
     """
     # Example form
@@ -169,13 +179,10 @@ def extend_info_into_json( data:dict, json_path:str):
     if not os.path.isfile(json_path):
         with open(json_path, 'w', encoding="utf-8") as f:
             json.dump(data, f)
-            
+
     else:
         with open(json_path, 'r+', encoding="utf-8") as f:
             json_data = json.load(f)
             json_data.update(data)
             f.seek(0)
             json.dump(json_data, f)
-
-    
-            
