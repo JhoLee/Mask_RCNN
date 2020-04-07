@@ -36,6 +36,7 @@ import skimage.draw
 
 # Root directory of the project
 import tqdm
+from PIL import Image
 
 ROOT_DIR = os.path.abspath("../../")
 
@@ -43,7 +44,8 @@ ROOT_DIR = os.path.abspath("../../")
 sys.path.append(ROOT_DIR)  # To find local version of the library
 from mrcnn.config import Config
 from mrcnn import model as modellib, utils
-from . import utils as face_utils
+
+# from.utils import
 
 # Path to trained weights file
 COCO_WEIGHTS_PATH = os.path.join(ROOT_DIR, "mask_rcnn_coco.h5")
@@ -52,6 +54,27 @@ COCO_WEIGHTS_PATH = os.path.join(ROOT_DIR, "mask_rcnn_coco.h5")
 # through the command line argument --logs
 DEFAULT_LOGS_DIR = os.path.join(ROOT_DIR, "logs")
 
+
+########################################################
+def open_image_as_nparray(img):
+    if type(img) is str:
+        img = Image.open(img)
+    img_array = np.asarray(img)
+
+    return img_array
+
+
+def load_mask_image_asarray(img, classes=[], values=[]):
+    # For one class...
+    img_array = open_image_as_nparray(img)
+
+    array = np.where(img_array == values[0], 1, 0)
+    array = array[:, :, np.newaxis]
+
+    return array
+
+
+#########################################################
 
 ############################################################
 #  Configurations
@@ -103,7 +126,7 @@ class FaceDataset(utils.Dataset):
 
             mask_image_path = os.path.join(mask_dir, im.replace('jpg', 'bmp'))
             # polygons = face_utils.load_coordinates_from_mask_asarray(mask_image_path, ['face'], [128])
-            polygons = face_utils.load_mask_image_asarray(mask_image_path, ['face'], [128])
+            polygons = load_mask_image_asarray(mask_image_path, ['face'], [128])
             self.add_image(
                 source="face",
                 image_id=im,  # use file name as a unique image id
