@@ -104,6 +104,8 @@ class FaceConfig(Config):
     # Skip detections with < 90% confidence
     DETECTION_MIN_CONFIDENCE = 0.9
 
+    # Resize to 256x256x3, cause CelebA datas' shape is 218x178x3
+    IMAGE_MAX_DIM = 256
 
 ############################################################
 #  Dataset
