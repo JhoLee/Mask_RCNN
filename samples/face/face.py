@@ -34,11 +34,18 @@ import datetime
 import numpy as np
 import skimage.draw
 
+# Image Augmentation
+import imageio
+import imgaug
+import imgaug.augmenters as iaa
+from imgaug.augmentables.segmaps import SegmentationMapsOnImage
+
 # Root directory of the project
+ROOT_DIR = os.path.abspath("../../")
+
 import tqdm
 from PIL import Image
 
-ROOT_DIR = os.path.abspath("../../")
 
 # Import Mask RCNN
 sys.path.append(ROOT_DIR)  # To find local version of the library
@@ -113,8 +120,10 @@ class FaceConfig(Config):
 
 class FaceDataset(utils.Dataset):
 
-    def load_face(self, dataset_dir, subset):
+    def load_face(self, dataset_dir, subset, augmentation_sequence=None):
         self.add_class("face", 1, "face")
+
+        imgaug.seed(1)
 
         assert subset in ["train", "val"]
         dataset_dir = os.path.join(dataset_dir, subset)
@@ -132,6 +141,8 @@ class FaceDataset(utils.Dataset):
             mask_image_path = os.path.join(mask_dir, im.replace('jpg', 'bmp'))
             # polygons = face_utils.load_coordinates_from_mask_asarray(mask_image_path, ['face'], [128])
             polygons = load_mask_image_asarray(mask_image_path, ['face'], [128])
+
+
             self.add_image(
                 source="face",
                 image_id=im,  # use file name as a unique image id
@@ -139,6 +150,25 @@ class FaceDataset(utils.Dataset):
                 width=width, height=height,
                 polygons=polygons
             )
+            # Image Augmentation
+            if augmentation_sequence is not None:
+                seq = augmentation_sequence
+
+                images_aug = []
+                segmaps_aug = []
+                for idx in tqdm.tqdm(range(5), desc="aug"):
+                    images_aug_i, segmaps_aug_i = seq(image=image, segmentation_maps=polygons)
+                    self.add_image(
+                        source="face",
+                        image_id=im + "aug_{}".format(idx),
+                        path="NOT DEFINED",
+                        width=width, height=height,
+                        polygons=segmaps_aug_i
+                    )
+                    images_aug.append(images_aug_i)
+                    segmaps_aug.append(segmaps_aug_i)
+
+
 
     def load_mask(self, image_id):
         """Generate instance masks for an image.
